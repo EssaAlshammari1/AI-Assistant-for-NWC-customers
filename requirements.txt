@@ -1,5 +1,6 @@
 python-dotenv
 groq
+openai
 pymilvus[milvus_lite]
 sentence-transformers
 tqdm

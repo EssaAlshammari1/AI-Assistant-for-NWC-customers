@@ -5,6 +5,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from groq import Groq
+from openai import OpenAI
 from pymilvus import MilvusClient
 from sentence_transformers import SentenceTransformer
 
@@ -14,6 +15,8 @@ MILVUS_URI = PROJECT_ROOT / "milvus_demo.db"
 COLLECTION_NAME = "my_rag_collection"
 EMBEDDING_MODEL = "Qwen/Qwen3-Embedding-0.6B"
 GROQ_MODEL = "qwen/qwen3.8-27b"
+OLLAMA_MODEL = "qwen3:8b"
+OLLAMA_BASE_URL = "http://localhost:11434/v1"
 MAX_CONVERSATION_TURNS = 10
 MAX_QUESTION_LENGTH = 2000
 MIN_CONTEXT_SCORE = 0.20
@@ -46,19 +49,35 @@ conversation_lock = Lock()
 
 def create_rag_components():
     load_dotenv(ENV_FILE, override=True)
-    api_key = (os.getenv("GROQ_API_KEY") or "").strip()
+    llm_provider = os.getenv("RAG_LLM_PROVIDER", "groq").strip().lower()
 
-    if not api_key or api_key.lower() in {"your-groq-api-key", "changeme", "replace-me"}:
-        raise RuntimeError("Set a valid GROQ_API_KEY in the project .env file.")
+    if llm_provider == "groq":
+        api_key = (os.getenv("GROQ_API_KEY") or "").strip()
+        if not api_key or api_key.lower() in {
+            "your-groq-api-key",
+            "replace-with-your-groq-api-key",
+            "changeme",
+            "replace-me",
+        }:
+            raise RuntimeError("Set a valid GROQ_API_KEY in the project .env file.")
+        llm_client = Groq(api_key=api_key)
+        llm_model = GROQ_MODEL
+    elif llm_provider == "ollama":
+        llm_client = OpenAI(
+            base_url=os.getenv("OLLAMA_BASE_URL", OLLAMA_BASE_URL),
+            api_key="ollama",
+        )
+        llm_model = os.getenv("OLLAMA_MODEL", OLLAMA_MODEL)
+    else:
+        raise ValueError("RAG_LLM_PROVIDER must be either 'groq' or 'ollama'.")
 
     embedding_model = SentenceTransformer(EMBEDDING_MODEL, trust_remote_code=True)
-    groq_client = Groq(api_key=api_key)
 
     milvus_client = MilvusClient(uri=str(MILVUS_URI))
     if not milvus_client.has_collection(COLLECTION_NAME):
         raise RuntimeError("Milvus collection is missing. Run create_embeddings.py first.")
     milvus_client.load_collection(COLLECTION_NAME)
-    return embedding_model, groq_client, milvus_client
+    return embedding_model, llm_client, milvus_client, llm_model
 
 
 def clear_conversation_history():
@@ -113,7 +132,7 @@ def answer_question(question, components):
     if len(question) > MAX_QUESTION_LENGTH:
         raise ValueError(f"question must be {MAX_QUESTION_LENGTH} characters or fewer")
 
-    embedding_model, groq_client, milvus_client = components
+    embedding_model, llm_client, milvus_client, llm_model = components
 
     query_vector = embedding_model.encode(
         question,
@@ -164,8 +183,8 @@ STYLE:
 - Output plain text only, without markdown code fences or bullet lists unless the answer needs a numbered procedure.
 """
 
-    response = groq_client.chat.completions.create(
-        model=GROQ_MODEL,
+    response = llm_client.chat.completions.create(
+        model=llm_model,
         messages=[
             {"role": "system", "content": system_prompt},
             {
