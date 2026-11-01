@@ -1,0 +1,5 @@
+python-dotenv
+groq
+pymilvus[milvus_lite]
+sentence-transformers
+tqdm

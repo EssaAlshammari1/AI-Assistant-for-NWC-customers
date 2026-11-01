@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="المساعد الذكي لشركة المياه الوطنية - أجب عن أسئلتك حول خدمات وإجراءات الشركة" />
+  <title>مساعد شركة المياه الوطنية | NWC Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=7" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top bar -->
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="العودة إلى أعلى الصفحة">
+        <span class="brand-logo-wrap">
+          <img class="brand-logo" src="../assets/nwc logo.png" alt="شعار شركة المياه الوطنية" />
+          <span class="brand-fallback" aria-hidden="true">NWC</span>
+        </span>
+        <span class="brand-copy">
+          <strong>شركة المياه الوطنية</strong>
+          <small>National Water Company</small>
+        </span>
+      </a>
+      <div class="topbar-actions">
+        <span class="api-status" id="apiStatus" role="status">
+          <i></i>
+          <span id="connectionText">جاري التحقق...</span>
+        </span>
+        <button class="icon-button" id="themeToggle" type="button" aria-label="تبديل المظهر" title="تبديل المظهر">
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+          </svg>
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">NWC / KNOWLEDGE DESK</p>
+          <h1>مساعد المياه<br /><em>بين يديك.</em></h1>
+          <p class="hero-description">اسأل باللغة العربية عن خدمات الشركة، الطلبات، الشكاوى، أو إجراءاتها. سأبحث في الأدلة المتاحة وأقدّم لك إجابة مركّزة وواضحة.</p>
+        </div>
+        <div class="hero-stamp" aria-hidden="true">
+          <span class="stamp-line"></span>
+          <span>ماء<br />معرفة<br />وضوح</span>
+        </div>
+      </section>
+
+      <!-- Chat workspace -->
+      <section class="workspace" aria-label="محادثة المساعد">
+        <div class="chat-card">
+          <div class="chat-head">
+            <div class="chat-head-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+              </svg>
+            </div>
+            <div class="chat-head-copy">
+              <strong>مساعد NWC المعرفي</strong>
+              <span>يرد فورًا على أسئلتك</span>
+            </div>
+            <button class="chat-clear" id="clearChat" type="button" aria-label="مسح المحادثة" title="مسح المحادثة">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              <span>مسح</span>
+            </button>
+          </div>
+
+          <!-- Messages -->
+          <div class="messages" id="messages" role="log" aria-live="polite">
+            <div class="message-row bot">
+              <div class="message-avatar bot-avatar" aria-hidden="true">
+                <img src="../assets/nwc logo.png" alt="" />
+              </div>
+              <div class="message-content">
+                <div class="message-bubble">
+                  <p>أهلاً بك! أنا المساعد الذكي لشركة المياه الوطنية.</p>
+                  <p class="greet-sub">يمكنك سؤالي عن الخدمات، الطلبات، الشكاوى، أو أي إجراءات خاصة بالشركة. ما الذي تودّ معرفته اليوم؟</p>
+                </div>
+                <span class="message-time" data-time></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state for suggestions (before many messages) -->
+          <div class="quick-suggestions" id="quickSuggestions">
+            <span class="suggestions-label">جرّب أن تسأل:</span>
+            <div class="suggestion-chips">
+              <button type="button" class="chip" data-question="كيف يمكنني تتبع الطلب؟">تتبع الطلب</button>
+              <button type="button" class="chip" data-question="كيف أقدّم شكوى؟">تقديم شكوى</button>
+              <button type="button" class="chip" data-question="كيف أكتشف تسرب المياه؟">كشف التسربات</button>
+              <button type="button" class="chip" data-question="ما هي خدمات عزل الخزانات؟">عزل الخزانات</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <form id="questionForm" class="question-form" autocomplete="off">
+          <label class="sr-only" for="questionInput">اكتب سؤالك</label>
+          <button class="audio-button" id="voiceButton" type="button" aria-label="اسأل بصوتك" title="اسأل بصوتك">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+              <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"></path>
+            </svg>
+            <span id="voiceButtonLabel">اسأل بصوتك</span>
+          </button>
+          <label class="sr-only" for="voiceLanguage">لغة السؤال الصوتي</label>
+          <select class="voice-language" id="voiceLanguage" aria-label="لغة السؤال الصوتي">
+            <option value="ar" selected>العربية</option>
+            <option value="en">English</option>
+          </select>
+          <textarea id="questionInput" rows="1" placeholder="اكتب سؤالك هنا..." autocomplete="off" enterkeyhint="send"></textarea>
+          <button class="ask-button" id="askButton" type="submit" aria-label="إرسال السؤال">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>
+            </svg>
+            <span>إرسال</span>
+          </button>
+        </form>
+
+        <div id="errorPanel" class="error-panel" hidden role="alert"></div>
+  <p id="voiceStatus" class="voice-status" role="status" hidden></p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>مساعد شركة المياه الوطنية · معرفة مبنية على الأدلة المتاحة</span>
+      <span>© NWC</span>
+    </footer>
+  </div>
+
+  <script src="app.js?v=8" defer></script>
+</body>
+</html>
